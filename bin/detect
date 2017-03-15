@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Check if it is MAX-server buildpack.
+
+if [[ -f $1/max-server.zip ]]; then
+  echo "MAX Server"
+  exti 0
+else
+  exit 1
+fi

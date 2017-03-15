@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Instead of compilation, unzip the single zip file.
+
+cd $1
+
+echo "Unzip max-server.zip"
+unzip max-server.zip
+
+echo "Set deployment environment"
+max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
+
