@@ -3,7 +3,10 @@
 # Instead of compilation, unzip the single zip file and configure
 # the deployment variables.
 
+echo "Switching to directory $1"
 cd $1
+echo `pwd`
+ls
 
 # buildpack automatically appends .zip suffix
 echo "Unzip max-server.zip"
