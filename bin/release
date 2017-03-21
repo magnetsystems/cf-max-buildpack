@@ -1,10 +1,12 @@
 #!/bin/bash
 #
-# Generate the default start command for this custom buildpack
+# Generate YAML with the default start command for this custom buildpack
 # To use this command, set "command: null" in manifest.yml
+#
+# Usage: bin/release build-dir
 
+BUILD_DIR=$1
 cat <<EOF
----
 default_procss_types:
-  web: $1/max-server/bin/max-server.sh start
+  web: $BUILD_DIR/max-server/bin/max-server.sh start
 EOF
