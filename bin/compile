@@ -5,7 +5,70 @@
 #
 # Usage: compile build-dir cacha-dir
 
-#install_java
+# Install a build pack
+install_build_pack() {
+  BUILDPACK=$4
+
+  dir=$(mktemp -t buildpackXXXXX)
+  rm -rf $dir
+
+  url=${BUILDPACK%#*}
+  branch=${BUILDPACK#*#}
+
+  if [[ "$branch" == "$url" ]]; then
+    branch=""
+  fi
+
+  if [[ ! -z "$url" ]]; then
+    echo "=== Download buildpack: $url"
+    if [[ "$url" =~ \.tgz$ ]]; then
+      mkdir -p "$dir"
+      curl -s "$url" | tar xvz -C "$dir" >/dev/null 2>&1
+    else
+      git clone $url $dir >/dev/null 2>&1
+      if [[ -f "$dir/.gitmodules" ]]; then
+        echo "=== Detected git submodules. Initializing..."
+        (cd $dir && git submodule update --init --recursive)
+      fi
+    fi
+    cd $dir
+
+    if [[ ! -z "$branch" ]]; then
+      git checkout $branch >/dev/null 2>&1
+    fi
+
+    chmod -f +x $dir/bin/{detect,compile,release} || true
+
+    framework=$($dir/bin/detect $1 || true)
+    if [[ $? -eq 0 ]]; then
+      echo "=== Deteced Framework: $framework"
+    else
+      echo "=== Detection failed: ignoring result"
+    fi
+
+    $dir/bin/compile $1 $2 $3
+    if [[ $? -ne 0 ]]; then
+      exit 1
+    fi
+
+    if [[ -e $dir/export ]]; then
+      source $dir/export
+    fi
+
+    if [[ -x $dir/bin/release ]]; then
+      $dir/bin/release $1 > $1/last-pack_release.out
+    fi
+  fi
+
+  if [[ -e $1/last_packrelease.out ]]; then
+    echo "Using release configuration from last framework ($framework)."
+    cat $1/last_pack_release.out
+  fi
+}
+
+
+# Install the java-buildpack
+install_build_pack "$1" "$2" "$3" https://github.com/cloudfoundry/java-buildpack.git
 
 echo "=== Switching to directory: $1"
 cd $1
@@ -15,14 +78,16 @@ if [[ -z "$JAVA_HOME" ]]; then
   export PATH=$JAVA_HOME/bin:$PATH
 fi
 
-ls -aR
-ls -la /home/vcap/app
-ls -la /iome/vcap/app
-ls -l $JAVA_HOME
+ls -la /home/vcap/app /usr/java $JAVA_HOME
 
 echo "=== JAVA_HOME=$JAVA_HOME"
 echo "=== PATH=$PATH"
-echo "=== java in `which java`"
+
+if [[ -z "`which java`" ]]; then
+  echo "=== Found java at `which java`"
+else
+  echo "=== No java is found"
+fi
 
 # buildpack automatically appends .zip suffix
 echo "=== Unzip max-server.zip"
