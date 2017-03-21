@@ -12,13 +12,15 @@ ls
 echo "Unzip max-server.zip"
 unzip max-server
 
-echo "JAVA_HOME=$JAVA_HOME"
-echo "PATH=$PATH"
-which java
-
 if [[ -z "$JAVA_HOME" ]]; then
   export JAVA_HOME=/home/vcap/app/.java-buildpack/open_jdk_jre
+  export PATH=$JAVA_HOME/bin:$PATH
 fi
+
+echo "JAVA_HOME=$JAVA_HOME"
+echo "PATH=$PATH"
+echo "java in `which java`"
+
 
 # This step will not be needed if the customization is done before the cf push.
 echo "Set deployment environment"
