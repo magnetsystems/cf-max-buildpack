@@ -1,3 +1,9 @@
+#!/bin/bash
+#
+# Generate the YML
+
+cat <<EOF
 ---
 default_procss_types:
   web: cd $1/max-server/bin; ./max-server.sh start
+EOF
