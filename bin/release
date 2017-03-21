@@ -3,4 +3,4 @@
 # Generate a YAML how the app should be executed
 
 default_procss_types:
-  web: cd $0/max-server/bin; ./max-server.sh start
+  web: cd $1/max-server/bin; ./max-server.sh start
