@@ -7,6 +7,7 @@
 
 BUILD_DIR=$1
 cat <<EOF
+---
 default_procss_types:
   web: $BUILD_DIR/max-server/bin/max-server.sh start
 EOF
