@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Generate the YML
+# Generate the default start command for this custom buildpack
+# To use this command, set "command: null" in manifest.yml
 
 cat <<EOF
 ---
