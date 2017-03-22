@@ -6,8 +6,11 @@
 # Usage: bin/release build-dir
 
 BUILD_DIR=$1
-cat <<EOF
+if [[ -e $BUILD_DIR/last_pack_release.out ]]; then
+  cat <<EOF
 ---
 default_procss_types:
   web: $BUILD_DIR/max-server/bin/max-server.sh start
 EOF
+  rm $BUILD_DIR/last_pack_release.out
+fi

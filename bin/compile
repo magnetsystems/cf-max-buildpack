@@ -1,13 +1,17 @@
-#!/bin/bash
+#!/bin/bash -v
 #
 # Install java (for now we assume it has been installed), unzip
 # the single zip file and configure the deployment variables.
 #
-# Usage: compile build-dir cacha-dir
+# Usage: compile build-dir cacha-dir env-dir
 
 # Install a build pack
+#
 install_build_pack() {
-  BUILDPACK=$4
+  BUILDPACK=$1
+  BUILD_DIR=$2
+  CACHE_DIR=$3
+  ENV_DIR=$4
 
   dir=$(mktemp -t buildpackXXXXX)
   rm -rf $dir
@@ -20,7 +24,7 @@ install_build_pack() {
   fi
 
   if [[ ! -z "$url" ]]; then
-    echo "=== Download buildpack: $url"
+    echo "=== Download buildpack: $url to $dir"
     if [[ "$url" =~ \.tgz$ ]]; then
       mkdir -p "$dir"
       curl -s "$url" | tar xvz -C "$dir" >/dev/null 2>&1
@@ -39,15 +43,17 @@ install_build_pack() {
 
     chmod -f +x $dir/bin/{detect,compile,release} || true
 
-    framework=$($dir/bin/detect $1 || true)
+    # Run the detect, compile and release.
+    framework=$($dir/bin/detect $BUILD_DIR || true)
     if [[ $? -eq 0 ]]; then
       echo "=== Deteced Framework: $framework"
     else
-      echo "=== Detection failed: ignoring result"
+      echo "@@@ Detection failed: ignoring result"
     fi
 
-    $dir/bin/compile $1 $2 $3
+    $dir/bin/compile $BUILD_DIR $CACHE_DIR $ENV_DIR
     if [[ $? -ne 0 ]]; then
+      echo "@@@ $BUILDPACK: compile failed"
       exit 1
     fi
 
@@ -56,44 +62,45 @@ install_build_pack() {
     fi
 
     if [[ -x $dir/bin/release ]]; then
-      $dir/bin/release $1 > $1/last-pack_release.out
+      $dir/bin/release $BUILD_DIR > $BUILD_DIR/last-pack_release.out
     fi
   fi
 
-  if [[ -e $1/last_packrelease.out ]]; then
-    echo "Using release configuration from last framework ($framework)."
-    cat $1/last_pack_release.out
+  if [[ -e $BUILD_DIR/last_packrelease.out ]]; then
+    echo "=== Using release configuration from last framework ($framework)."
+    cat $BUILD_DIR/last_pack_release.out
   fi
 }
 
+#
+# Main starts here
+#
 
-# Install the java-buildpack
-install_build_pack "$1" "$2" "$3" https://github.com/cloudfoundry/java-buildpack.git
-
-echo "=== Switching to directory: $1"
-cd $1
-
-if [[ -z "$JAVA_HOME" ]]; then
-  export JAVA_HOME=/home/vcap/app/.java-buildpack/open_jdk_jre
-  export PATH=$JAVA_HOME/bin:$PATH
-fi
-
-ls -la /home/vcap/app /usr/java $JAVA_HOME
-
-echo "=== JAVA_HOME=$JAVA_HOME"
-echo "=== PATH=$PATH"
-
-if [[ -z "`which java`" ]]; then
-  echo "=== Found java at `which java`"
-else
-  echo "=== No java is found"
-fi
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+echo "=== max-server/bin/compile: $BUILD_DIR $CACHE_DIR $ENV_DIR"
+cd $BUILD_DIR
 
 # buildpack automatically appends .zip suffix
 echo "=== Unzip max-server.zip"
 unzip max-server
 
+# Install the java-buildpack
+( install_build_pack https://github.com/cloudfoundry/java-buildpack.git $BUILD_DIR/max-server $CACHE_DIR $ENV_DIR )
+
+if [[ -z "`which java`" ]]; then
+  if [[ -z "$JAVA_HOME" ]]; then
+    export JAVA_HOME=/home/vcap/app/.java-buildpack/open_jdk_jre
+    export PATH=$JAVA_HOME/bin:/usr/java:$PATH
+  fi
+  echo "=== No java is found; assume in $JAVA_HOME"
+  echo "@@@ Where is java: `which java`"
+else
+  echo "=== Found java at `which java`"
+fi
+
 # This step will not be needed if the customization is done before the cf push.
 # It requires java, so it may be problematic if java runtime is not available.
-echo "=== Set deployment environment"
-max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
+#echo "=== Set deployment environment"
+#max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
