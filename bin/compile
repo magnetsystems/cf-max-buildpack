@@ -142,12 +142,11 @@ unzip max-server
 install_java $BUILD_DIR $CACHE_DIR $ENV_DIR
 
 if [[ -z "`which java`" ]]; then
-  if [[ -z "$JAVA_HOME" ]]; then
-    export JAVA_HOME=/home/vcap/app/.java-buildpack/open_jdk_jre
-    export PATH=$JAVA_HOME/bin:/usr/java:$PATH
-  fi
-  echo "=== No java is found; assume in $JAVA_HOME"
-  echo "@@@ Where is java: `which java`"
+#  if [[ -z "$JAVA_HOME" ]]; then
+#    export JAVA_HOME=/home/vcap/app/.java-buildpack/open_jdk_jre
+#    export PATH=$JAVA_HOME/bin:/usr/java:$PATH
+#  fi
+  echo "@@@ No java is found"
 else
   echo "=== Found java at `which java`"
 fi
