@@ -72,11 +72,11 @@ install_build_pack() {
   fi
 }
 
-# Install java from heroku-buildpack-java
+# Install java from heroku-buildpack-java (currently we disable mvn)
 install_java() {
   BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
-  . $BP_DIR/lib/common.sh
-  . $BP_DIR/lib/maven.sh
+#  . $BP_DIR/lib/common.sh
+#  . $BP_DIR/lib/maven.sh
 
   # parse args
   BUILD_DIR=$1
