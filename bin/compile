@@ -72,6 +72,31 @@ install_build_pack() {
   fi
 }
 
+# Install java from heroku-buildpack-java
+install_java() {
+  BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
+  . $BP_DIR/lib/common.sh
+  . $BP_DIR/lib/maven.sh
+
+  # parse args
+  BUILD_DIR=$1
+  CACHE_DIR=$2
+  ENV_DIR=$3
+
+  export_env_dir $ENV_DIR
+
+  JVM_COMMON_BUILDPACK=${JVM_COMMON_BUILDPACK:-https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/jvm-common.tgz}
+  mkdir -p /tmp/jvm-common
+  curl --retry 3 --silent --location $JVM_COMMON_BUILDPACK | tar xzm -C /tmp/jvm-common --strip-components=1
+  . /tmp/jvm-common/bin/util
+  . /tmp/jvm-common/bin/java
+  . /tmp/jvm-common/opt/jdbc.sh
+  install_java_with_overlay ${BUILD_DIR}
+
+  #create the cache dir if it doesn't exist
+  mkdir -p $CACHE_DIR
+}
+
 #
 # Main starts here
 #
@@ -87,7 +112,9 @@ echo "=== Unzip max-server.zip"
 unzip max-server
 
 # Install the java-buildpack
-( install_build_pack https://github.com/cloudfoundry/java-buildpack.git $BUILD_DIR $CACHE_DIR $ENV_DIR )
+#( install_build_pack https://github.com/cloudfoundry/java-buildpack.git $BUILD_DIR $CACHE_DIR $ENV_DIR )
+
+install_java $BUILD_DIR $CACHE_DIR $ENV_DIR
 
 if [[ -z "`which java`" ]]; then
   if [[ -z "$JAVA_HOME" ]]; then
