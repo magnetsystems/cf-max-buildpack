@@ -1,4 +1,4 @@
-#!/bin/bash -v
+#!/bin/bash
 #
 # Install java (for now we assume it has been installed), unzip
 # the single zip file and configure the deployment variables.
