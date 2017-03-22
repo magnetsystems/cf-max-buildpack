@@ -6,11 +6,13 @@
 # Usage: bin/release build-dir
 
 BUILD_DIR=$1
-if [[ -e $BUILD_DIR/last_pack_release.out ]]; then
-  cat <<EOF
+cat <<EOF
 ---
 default_procss_types:
   web: $BUILD_DIR/max-server/bin/max-server.sh start
 EOF
+
+# Remove any files from install_buildpack
+if [[ -e $BUILD_DIR/last_pack_release.out ]]; then
   rm $BUILD_DIR/last_pack_release.out
 fi
