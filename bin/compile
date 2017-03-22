@@ -6,7 +6,6 @@
 # Usage: compile build-dir cacha-dir env-dir
 
 # Install a build pack
-#
 install_buildpack() {
   BUILDPACK=$1
   BUILD_DIR=$2
@@ -72,6 +71,31 @@ install_buildpack() {
   fi
 }
 
+# Common functions from heroku-buildpack-java/lib/common.sh
+export_env_dir() {
+  env_dir=$1
+  whitelist_regex=${2:-''}
+  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH|JAVA_OPTS|JAVA_TOOL_OPTIONS)$'}
+  if [[ -d "$env_dir" ]]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
+  fi
+}
+
+cache_copy() {
+  rel_dir=$1
+  from_dir=$2
+  to_dir=$3
+  rm -rf $to_dir/$rel_dir
+  if [ -d $from_dir/$rel_dir ]; then
+    mkdir -p $to_dir/$rel_dir
+    cp -pr $from_dir/$rel_dir/. $to_dir/$rel_dir
+  fi
+}
+
 # Install java from heroku-buildpack-java (currently we disable mvn)
 install_java() {
   BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
@@ -130,5 +154,5 @@ fi
 
 # This step will not be needed if the customization is done before the cf push.
 # It requires java, so it may be problematic if java runtime is not available.
-#echo "=== Set deployment environment"
-#max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
+echo "=== Set deployment environment"
+max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
