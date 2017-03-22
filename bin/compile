@@ -44,9 +44,9 @@ install_build_pack() {
     chmod -f +x $dir/bin/{detect,compile,release} || true
 
     # Run the detect, compile and release.
-    framework=$($dir/bin/detect $BUILD_DIR || true)
+    framework=$($dir/bin/detect $BUILD_DIR)
     if [[ $? -eq 0 ]]; then
-      echo "=== Deteced Framework: $framework"
+      echo "=== Detected Framework: $framework"
     else
       echo "@@@ Detection failed: ignoring result"
     fi
