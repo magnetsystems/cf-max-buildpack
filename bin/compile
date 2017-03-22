@@ -87,7 +87,7 @@ echo "=== Unzip max-server.zip"
 unzip max-server
 
 # Install the java-buildpack
-( install_build_pack https://github.com/cloudfoundry/java-buildpack.git $BUILD_DIR/max-server $CACHE_DIR $ENV_DIR )
+( install_build_pack https://github.com/cloudfoundry/java-buildpack.git $BUILD_DIR $CACHE_DIR $ENV_DIR )
 
 if [[ -z "`which java`" ]]; then
   if [[ -z "$JAVA_HOME" ]]; then
