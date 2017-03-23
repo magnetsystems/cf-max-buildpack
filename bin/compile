@@ -153,5 +153,5 @@ fi
 
 # This step will not be needed if the customization is done before the cf push.
 # It requires java, so it may be problematic if java runtime is not available.
-echo "=== Set deployment environment"
-max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
+#echo "=== Set deployment environment"
+#max-server/bin/replace-env.sh max-server/server/conf/default deploy_env/default.props deploy_env/cf.props
