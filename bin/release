@@ -9,7 +9,7 @@ BUILD_DIR=$1
 cat <<EOF
 ---
 default_procss_types:
-  web: $BUILD_DIR/max-server/bin/max-server.sh start
+  web: $BUILD_DIR/max-server/bin/max-server.sh -f start
 EOF
 
 # Remove any files from install_buildpack
